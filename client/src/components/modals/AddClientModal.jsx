@@ -4,12 +4,14 @@ import { FaUser } from "react-icons/fa";
 import { useMutation } from "@apollo/client";
 import { ADD_CLIENT } from "../../queries/ADD_CLIENT";
 import { GET_CLIENTS } from "../../queries/GET_CLIENTS";
+import Snackbar from "../Snackbar";
+import { useSnackbar } from "../hooks/useSnackbar";
 
 export default function AddClientModal() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-
+  const { isActive, message, openSnackBar } = useSnackbar();
   const [addClient] = useMutation(ADD_CLIENT, {
     variables: { name, email, phone },
     update(cache, { data: { addClient } }) {
@@ -19,6 +21,13 @@ export default function AddClientModal() {
         query: GET_CLIENTS,
         data: { clients: [...clients, addClient] },
       });
+    },
+
+    onCompleted: () => {
+      openSnackBar("Added new client successfully", "success");
+    },
+    onError: () => {
+      openSnackBar("Something went wrong while adding new client", "error");
     },
   });
 
@@ -114,6 +123,7 @@ export default function AddClientModal() {
           </div>
         </div>
       </div>
+      <Snackbar isActive={isActive} message={message} />
     </>
   );
 }
