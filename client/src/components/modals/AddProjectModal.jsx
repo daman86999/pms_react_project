@@ -5,13 +5,15 @@ import { useMutation, useQuery } from "@apollo/client";
 import { ADD_PROJECT } from "../../queries/ADD_PROJECT";
 import { GET_PROJECTS } from "../../queries/GET_PROJECTS";
 import { GET_CLIENTS } from "../../queries/GET_CLIENTS";
+import { useSnackbar } from "../hooks/useSnackbar";
+import Snackbar from "../Snackbar";
 
 export default function AddProjectModal() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [clientId, setClientId] = useState("");
   const [status, setStatus] = useState("new");
-
+  const { isActive, message, openSnackBar } = useSnackbar();
   const [addProject] = useMutation(ADD_PROJECT, {
     variables: { name, description, clientId, status },
     update(cache, { data: { addProject } }) {
@@ -20,6 +22,12 @@ export default function AddProjectModal() {
         query: GET_PROJECTS,
         data: { projects: [...projects, addProject] },
       });
+    },
+    onCompleted: () => {
+      openSnackBar("Added new project successfully", "success");
+    },
+    onError: () => {
+      openSnackBar("Something went wrong while adding project", "error");
     },
   });
 
@@ -59,7 +67,6 @@ export default function AddProjectModal() {
               <div>New Project</div>
             </div>
           </button>
-
           <div
             className="modal fade"
             id="addProjectModal"
@@ -143,6 +150,7 @@ export default function AddProjectModal() {
               </div>
             </div>
           </div>
+          <Snackbar isActive={isActive} message={message} />
         </>
       )}
     </>
