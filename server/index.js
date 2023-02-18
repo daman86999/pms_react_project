@@ -4,8 +4,11 @@ const cors = require("cors");
 const { graphqlHTTP } = require("express-graphql");
 const schema = require("./schema/schema");
 const connectDB = require("./config/db");
+const isAuth = require("./middleware/isAuthenticated");
 const port = process.env.PORT || 5000;
 const app = express();
+
+app.use(isAuth);
 
 connectDB();
 
