@@ -1,3 +1,5 @@
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const Project = require("../models/Project");
 const Client = require("../models/Client");
 
@@ -7,6 +9,7 @@ const {
   GraphQLString,
   GraphQLSchema,
   GraphQLList,
+  GraphQLInt,
   GraphQLNonNull,
   GraphQLEnumType,
 } = require("graphql");
@@ -19,6 +22,7 @@ const ClientType = new GraphQLObjectType({
     name: { type: GraphQLString },
     email: { type: GraphQLString },
     phone: { type: GraphQLString },
+    password: { type: GraphQLString },
   }),
 });
 
@@ -39,9 +43,44 @@ const ProjectType = new GraphQLObjectType({
   }),
 });
 
+// Auth Type
+const AuthType = new GraphQLObjectType({
+  name: "Authentication",
+  fields: () => ({
+    id: { type: GraphQLID },
+    token: { type: GraphQLString },
+    tokenExpiration: { type: GraphQLInt },
+  }),
+});
+
 const RootQuery = new GraphQLObjectType({
   name: "RootQueryType",
   fields: {
+    login: {
+      type: AuthType,
+      args: {
+        email: { type: GraphQLNonNull(GraphQLString) },
+        password: { type: GraphQLNonNull(GraphQLString) },
+      },
+      async resolve(_parent, args) {
+        const client = await Client.findOne({ email: args.email });
+        if (!client) {
+          throw new Error("User does not exist!");
+        }
+        const isEqual = await bcrypt.compare(args.password, client.password);
+        if (!isEqual) {
+          throw new Error("Password is incorrect!");
+        }
+        const token = jwt.sign(
+          { id: client.id, email: client.email },
+          process.env.JWT_SECRET_KEY,
+          {
+            expiresIn: "1h",
+          }
+        );
+        return { id: client.id, token: token, tokenExpiration: 1 };
+      },
+    },
     projects: {
       type: new GraphQLList(ProjectType),
       resolve() {
@@ -75,22 +114,30 @@ const RootQuery = new GraphQLObjectType({
 const mutation = new GraphQLObjectType({
   name: "Mutation",
   fields: {
-    // Add a client
+    // Add a client or signup
     addClient: {
       type: ClientType,
       args: {
         name: { type: GraphQLNonNull(GraphQLString) },
         email: { type: GraphQLNonNull(GraphQLString) },
         phone: { type: GraphQLNonNull(GraphQLString) },
+        password: { type: GraphQLNonNull(GraphQLString) },
       },
-      resolve(_parent, args) {
+      async resolve(_parent, args) {
+        const existingClient = await Client.findOne({ email: args.email });
+        if (existingClient) {
+          throw new Error("User exists already.");
+        }
+        const hashedPassword = await bcrypt.hash(args.password, 12);
         const client = new Client({
           name: args.name,
           email: args.email,
           phone: args.phone,
+          password: hashedPassword,
         });
-
-        return client.save();
+        const { id, name, email, phone } = await client.save();
+        return { id, email, phone, name };
+        // return client.save();
       },
     },
     // Delete a client
@@ -99,14 +146,18 @@ const mutation = new GraphQLObjectType({
       args: {
         id: { type: GraphQLNonNull(GraphQLID) },
       },
-      resolve(_parent, args) {
+      async resolve(_parent, args, context) {
+        if (!context.isAuth) {
+          throw new Error("Unauthenticated!");
+        }
+
         Project.find({ clientId: args.id }).then((projects) => {
           projects.forEach((project) => {
             project.remove();
           });
         });
 
-        return Client.findByIdAndRemove(args.id);
+        return await Client.findByIdAndRemove(args.id);
       },
     },
     // Add a project
@@ -128,15 +179,18 @@ const mutation = new GraphQLObjectType({
         },
         clientId: { type: GraphQLNonNull(GraphQLID) },
       },
-      resolve(_parent, args) {
+      async resolve(_parent, args, context) {
+        console.log({ args, context });
+        if (!context.isAuth) {
+          throw new Error("Unauthenticated!");
+        }
         const project = new Project({
           name: args.name,
           description: args.description,
           status: args.status,
           clientId: args.clientId,
         });
-
-        return project.save();
+        return await project.save();
       },
     },
     // Delete a project
@@ -145,8 +199,11 @@ const mutation = new GraphQLObjectType({
       args: {
         id: { type: GraphQLNonNull(GraphQLID) },
       },
-      resolve(_parent, args) {
-        return Project.findByIdAndRemove(args.id);
+      async resolve(_parent, args, context) {
+        if (!context.isAuth) {
+          throw new Error("Unauthenticated!");
+        }
+        return await Project.findByIdAndRemove(args.id);
       },
     },
     // Update a project
@@ -167,7 +224,10 @@ const mutation = new GraphQLObjectType({
           }),
         },
       },
-      resolve(_parent, args) {
+      async resolve(_parent, args, context) {
+        if (!context.isAuth) {
+          throw new Error("Unauthenticated!");
+        }
         return Project.findByIdAndUpdate(
           args.id,
           {
