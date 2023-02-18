@@ -180,7 +180,6 @@ const mutation = new GraphQLObjectType({
         clientId: { type: GraphQLNonNull(GraphQLID) },
       },
       async resolve(_parent, args, context) {
-        console.log({ args, context });
         if (!context.isAuth) {
           throw new Error("Unauthenticated!");
         }

@@ -1,7 +1,6 @@
 const jwt = require("jsonwebtoken");
 
 module.exports = (req, res, next) => {
-  console.log({ req });
   /* Getting the authorization header from the request. */
   const authHeader = req.get("Authorization");
   /* Checking if the authorization header is present in the request. If it is not present, it is setting
@@ -38,7 +37,6 @@ the isAuth property of the request to false and returning the next middleware. *
     return next();
   }
   req.isAuth = true;
-  console.log({ decodedToken });
   req.id = decodedToken.id;
   next();
 };
