@@ -4,7 +4,7 @@ import { FaTrash } from "react-icons/fa";
 import { DELETE_PROJECT } from "../queries/DELETE_PROJECT";
 import { GET_PROJECTS } from "../queries/GET_PROJECTS";
 import { useMutation } from "@apollo/client";
-import { useSnackbar } from "./hooks/useSnackbar";
+import { useSnackbar } from "../hooks/useSnackbar";
 import Snackbar from "./Snackbar";
 
 export default function DeleteProjectButton({ projectId }) {

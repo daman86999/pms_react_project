@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useMutation } from "@apollo/client";
 import { GET_PROJECT } from "../queries//GET_PROJECTS";
 import { UPDATE_PROJECT } from "../queries/UPDATE_PROJECT";
-import { useSnackbar } from "./hooks/useSnackbar";
+import { useSnackbar } from "../hooks/useSnackbar";
 import Snackbar from "./Snackbar";
 
 export default function EditProjectForm({ project }) {

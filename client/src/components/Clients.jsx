@@ -1,13 +1,19 @@
-import React from "react";
+import React, { useContext } from "react";
 import { useMutation, useQuery } from "@apollo/client";
 import Spinner from "./Spinner";
-import { GET_CLIENTS } from "../queries/GET_CLIENTS";
+import { GET_CLIENT } from "../queries/GET_CLIENT";
 import { DELETE_CLIENT } from "../queries/DELETE_CLIENT";
 import { FaTrash } from "react-icons/fa";
 import { GET_PROJECTS } from "../queries/GET_PROJECTS";
+import authContext from "../context/authContext";
 
 export default function Clients() {
-  const { loading, error, data } = useQuery(GET_CLIENTS);
+  const { authData } = useContext(authContext);
+  const clientId = authData.id;
+  console.log({ authData });
+  const { loading, error, data } = useQuery(GET_CLIENT, {
+    variables: { id: clientId },
+  });
   const [deleteClient] = useMutation(DELETE_CLIENT);
 
   if (loading) return <Spinner />;
@@ -16,7 +22,7 @@ export default function Clients() {
   const handleDelete = (client) => {
     deleteClient({
       variables: { id: client.id },
-      refetchQueries: [{ query: GET_CLIENTS }, { query: GET_PROJECTS }],
+      refetchQueries: [{ query: GET_CLIENT }, { query: GET_PROJECTS }],
     });
   };
 
