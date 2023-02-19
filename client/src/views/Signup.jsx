@@ -135,7 +135,7 @@ export default function Signup() {
                   </div>
 
                   <Link
-                    to={"/signin"}
+                    to={"/login"}
                     className="d-block text-center mt-4 small"
                   >
                     Have an account? Sign In

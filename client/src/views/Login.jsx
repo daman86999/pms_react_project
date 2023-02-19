@@ -4,9 +4,7 @@ import Snackbar from "../components/Snackbar";
 import { useSnackbar } from "../hooks/useSnackbar";
 import { LOGIN } from "../queries/LOGIN";
 import AuthContext from "../context/authContext";
-import Spinner from "../components/Spinner";
 import { Link, useNavigate } from "react-router-dom";
-import { useCookies } from "react-cookie";
 
 function Login() {
   const intialState = {
@@ -15,17 +13,15 @@ function Login() {
   };
   const navigate = useNavigate();
   const [data, setData] = useState(intialState);
-  const [setCookies] = useCookies();
   const { isActive, message, openSnackBar } = useSnackbar();
 
   const { authData, setCurrentAuthData } = useContext(AuthContext);
   console.log({ authData });
   const [login] = useLazyQuery(LOGIN, {
     onCompleted: (authData) => {
-      // navigate("/");
+      navigate("/");
       const { token, id, tokenExpiration } = authData.login;
       console.log({ token, id, tokenExpiration, authData });
-      // setCookies(token);
       setCurrentAuthData({ token, id, tokenExpiration });
       openSnackBar("Logged in successfully", "success");
     },
