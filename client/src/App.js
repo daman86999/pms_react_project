@@ -9,6 +9,7 @@ import AuthContext from "./context/authContext";
 import Login from "./views/Login";
 import Signup from "./views/Signup";
 import { useAuth } from "./hooks/useAuth";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 /* A way to merge the data from the cache with the data from the server. */
 const cache = new InMemoryCache({
@@ -33,10 +34,6 @@ const client = new ApolloClient({
 
 function App() {
   const auth = useAuth();
-  useEffect(() => {
-    console.log({ auth });
-  }, [auth]);
-
   return (
     <>
       <ApolloProvider client={client}>
@@ -45,11 +42,46 @@ function App() {
             <Header />
             <div className="container">
               <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/projects/:id" element={<Project />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="*" element={<NotFound />} />
+                <Route
+                  path="/"
+                  element={
+                    <ProtectedRoute isPrivate>
+                      <Home />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/projects/:id"
+                  element={
+                    <ProtectedRoute isPrivate>
+                      <Project />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/login"
+                  element={
+                    <ProtectedRoute>
+                      <Login />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/signup"
+                  element={
+                    <ProtectedRoute>
+                      <Signup />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="*"
+                  element={
+                    <ProtectedRoute isPrivate>
+                      <NotFound />
+                    </ProtectedRoute>
+                  }
+                />
               </Routes>
             </div>
           </Router>

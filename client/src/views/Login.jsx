@@ -4,24 +4,24 @@ import Snackbar from "../components/Snackbar";
 import { useSnackbar } from "../hooks/useSnackbar";
 import { LOGIN } from "../queries/LOGIN";
 import AuthContext from "../context/authContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import Spinner from "../components/Spinner";
 
 function Login() {
   const intialState = {
     email: "",
     password: "",
   };
-  const navigate = useNavigate();
+
   const [data, setData] = useState(intialState);
+
   const { isActive, message, openSnackBar } = useSnackbar();
 
-  const { authData, setCurrentAuthData } = useContext(AuthContext);
-  console.log({ authData });
-  const [login] = useLazyQuery(LOGIN, {
+  const { setCurrentAuthData } = useContext(AuthContext);
+
+  const [login, { loading }] = useLazyQuery(LOGIN, {
     onCompleted: (authData) => {
-      navigate("/");
       const { token, id, tokenExpiration } = authData.login;
-      console.log({ token, id, tokenExpiration, authData });
       setCurrentAuthData({ token, id, tokenExpiration });
       openSnackBar("Logged in successfully", "success");
     },
@@ -43,8 +43,6 @@ function Login() {
     login({
       variables: data,
     });
-
-    // setData(intialState);
   };
 
   const handleOnChange = (e) => {
@@ -55,7 +53,7 @@ function Login() {
     }));
   };
 
-  // if (loading) return <Spinner />;
+  if (loading) return <Spinner />;
 
   return (
     <>

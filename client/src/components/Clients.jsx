@@ -10,12 +10,10 @@ import authContext from "../context/authContext";
 export default function Clients() {
   const { authData } = useContext(authContext);
   const clientId = authData.id;
-  console.log({ authData });
   const { loading, error, data } = useQuery(GET_CLIENT, {
     variables: { id: clientId },
   });
   const [deleteClient] = useMutation(DELETE_CLIENT);
-
   if (loading) return <Spinner />;
   if (error) return <p>Something Went Wrong</p>;
 
@@ -25,6 +23,7 @@ export default function Clients() {
       refetchQueries: [{ query: GET_CLIENT }, { query: GET_PROJECTS }],
     });
   };
+  const client = data.client;
 
   return (
     <>
@@ -39,21 +38,19 @@ export default function Clients() {
             </tr>
           </thead>
           <tbody>
-            {data.clients.map((client) => (
-              <tr key={client.id}>
-                <td>{client.name}</td>
-                <td>{client.email}</td>
-                <td>{client.phone}</td>
-                <td>
-                  <button
-                    className="btn btn-danger btn-sm"
-                    onClick={() => handleDelete(client)}
-                  >
-                    <FaTrash />
-                  </button>
-                </td>
-              </tr>
-            ))}
+            <tr key={client.id}>
+              <td>{client.name}</td>
+              <td>{client.email}</td>
+              <td>{client.phone}</td>
+              <td>
+                <button
+                  className="btn btn-danger btn-sm"
+                  onClick={() => handleDelete(client)}
+                >
+                  <FaTrash />
+                </button>
+              </td>
+            </tr>
           </tbody>
         </table>
       )}

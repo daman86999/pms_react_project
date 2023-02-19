@@ -13,7 +13,6 @@ export function useSnackbar() {
   }, [isActive]);
 
   const openSnackBar = (msg = "Something went wrong...", variant) => {
-    console.log(msg);
     setVariant(variant);
     setMessage(msg);
     setIsActive(true);

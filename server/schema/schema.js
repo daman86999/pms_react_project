@@ -9,7 +9,6 @@ const {
   GraphQLString,
   GraphQLSchema,
   GraphQLList,
-  GraphQLInt,
   GraphQLNonNull,
   GraphQLEnumType,
 } = require("graphql");
@@ -49,7 +48,7 @@ const AuthType = new GraphQLObjectType({
   fields: () => ({
     id: { type: GraphQLID },
     token: { type: GraphQLString },
-    tokenExpiration: { type: GraphQLInt },
+    tokenExpiration: { type: GraphQLString },
   }),
 });
 
@@ -78,7 +77,8 @@ const RootQuery = new GraphQLObjectType({
             expiresIn: "1h",
           }
         );
-        return { id: client.id, token: token, tokenExpiration: 1 };
+
+        return { id: client.id, token: token, tokenExpiration: 3600 };
       },
     },
     projects: {
