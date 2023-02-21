@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import { useCookies } from "react-cookie";
+import { parseJwt } from "../utils/parseJWTtoken";
 
 /**
  * It's a custom hook that returns an object with two properties: authData and setCurrentAuthData.
@@ -22,9 +23,9 @@ import { useCookies } from "react-cookie";
  * @returns An object with two properties: authData and setCurrentAuthData.
  */
 export const useAuth = () => {
-  const [setCookie] = useCookies(["token"]);
+  const [cookie, setCookie] = useCookies(["token"]);
   const initialState = {
-    id: null,
+    id: cookie.token ? parseJwt(cookie.token).id : null,
   };
 
   const [authData, setAuthData] = useState(initialState);

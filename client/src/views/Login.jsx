@@ -4,7 +4,7 @@ import Snackbar from "../components/Snackbar";
 import { useSnackbar } from "../hooks/useSnackbar";
 import { LOGIN } from "../queries/LOGIN";
 import AuthContext from "../context/authContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Spinner from "../components/Spinner";
 
 function Login() {
@@ -12,6 +12,7 @@ function Login() {
     email: "",
     password: "",
   };
+  const navigate = useNavigate();
 
   const [data, setData] = useState(intialState);
 
@@ -24,6 +25,7 @@ function Login() {
       const { token, id, tokenExpiration } = authData.login;
       setCurrentAuthData({ token, id, tokenExpiration });
       openSnackBar("Logged in successfully", "success");
+      navigate("/");
     },
     onError: (err) => {
       let message = err.message ?? "Something went wrong while signing in";
