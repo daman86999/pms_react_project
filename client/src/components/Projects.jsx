@@ -1,10 +1,15 @@
-import React from "react";
+import React, { useContext } from "react";
 import Spinner from "./Spinner";
 import { useQuery } from "@apollo/client";
 import { GET_PROJECTS } from "../queries/GET_PROJECTS";
+import authContext from "../context/authContext";
 
 export default function Projects() {
-  const { loading, error, data } = useQuery(GET_PROJECTS);
+  const { authData } = useContext(authContext);
+  const clientId = authData.id;
+  const { loading, error, data } = useQuery(GET_PROJECTS, {
+    variables: { clientId: clientId },
+  });
 
   if (loading) return <Spinner />;
   if (error) return <p>Something Went Wrong</p>;
